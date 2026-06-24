@@ -1,0 +1,964 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Fokus">
+<meta name="theme-color" content="#778873">
+<title>Fokus</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --sage:    #778873;
+    --mint:    #A1BC98;
+    --cream:   #FDF6ED;
+    --stone:   #DCCFC0;
+    --sage-dark: #5c6b58;
+    --text:    #3a3830;
+    --text-muted: #7a7567;
+    --sidebar-w: 220px;
+    --radius: 14px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--cream);
+    color: var(--text);
+    min-height: 100vh;
+    min-height: 100dvh;
+    display: flex;
+    overflow: hidden;
+  }
+
+  /* ── SIDEBAR ── */
+  .sidebar {
+    width: var(--sidebar-w);
+    background: var(--sage);
+    display: flex;
+    flex-direction: column;
+    padding: 28px 0 20px;
+    flex-shrink: 0;
+    overflow-y: auto;
+  }
+
+  .logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--cream);
+    letter-spacing: 0.04em;
+    padding: 0 20px 28px;
+    border-bottom: 1px solid rgba(255,255,255,0.15);
+    margin-bottom: 16px;
+  }
+  .logo span { display: block; font-size: 10px; font-family: 'Inter', sans-serif; font-weight: 300; letter-spacing: 0.12em; opacity: 0.7; text-transform: uppercase; margin-top: 2px; }
+
+  .cat-label {
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.5);
+    padding: 0 20px 8px;
+  }
+
+  .cat-list { flex: 1; }
+
+  .cat-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 20px;
+    cursor: pointer;
+    border-radius: 0;
+    transition: background 0.15s;
+    color: rgba(255,255,255,0.82);
+    font-size: 13.5px;
+    font-weight: 400;
+    position: relative;
+  }
+  .cat-item:hover { background: rgba(255,255,255,0.1); }
+  .cat-item.active {
+    background: rgba(255,255,255,0.18);
+    color: #fff;
+    font-weight: 500;
+  }
+  .cat-item.active::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 6px; bottom: 6px;
+    width: 3px;
+    background: var(--cream);
+    border-radius: 0 3px 3px 0;
+  }
+  .cat-dot {
+    width: 9px; height: 9px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .cat-count {
+    margin-left: auto;
+    font-size: 11px;
+    background: rgba(0,0,0,0.15);
+    padding: 1px 7px;
+    border-radius: 20px;
+    color: rgba(255,255,255,0.7);
+  }
+
+  .add-cat-btn {
+    margin: 12px 16px 0;
+    padding: 8px 12px;
+    background: rgba(255,255,255,0.12);
+    border: 1px dashed rgba(255,255,255,0.3);
+    border-radius: 10px;
+    color: rgba(255,255,255,0.7);
+    font-size: 12px;
+    cursor: pointer;
+    display: flex; align-items: center; gap: 6px;
+    transition: background 0.15s;
+    font-family: 'Inter', sans-serif;
+  }
+  .add-cat-btn:hover { background: rgba(255,255,255,0.2); }
+
+  .sidebar-footer {
+    padding: 16px 20px 0;
+    border-top: 1px solid rgba(255,255,255,0.12);
+    margin-top: 8px;
+  }
+  .sidebar-footer-txt {
+    font-size: 10px;
+    color: rgba(255,255,255,0.4);
+    text-align: center;
+  }
+
+  /* ── MAIN ── */
+  .main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 22px 28px 16px;
+    border-bottom: 1px solid var(--stone);
+    gap: 16px;
+  }
+
+  .topbar-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--text);
+  }
+  .topbar-sub { font-size: 11.5px; color: var(--text-muted); margin-top: 1px; }
+
+  .progress-ring-wrap {
+    display: flex; align-items: center; gap: 10px;
+    cursor: pointer;
+  }
+  .pom-toggle-btn {
+    background: var(--sage);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 8px 14px;
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex; align-items: center; gap: 6px;
+    transition: background 0.2s;
+  }
+  .pom-toggle-btn:hover { background: var(--sage-dark); }
+
+  /* ── TODO CONTENT ── */
+  .content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 24px 28px 100px;
+  }
+
+  .add-task-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 24px;
+  }
+  .add-task-input {
+    flex: 1;
+    border: 1.5px solid var(--stone);
+    background: #fff;
+    border-radius: var(--radius);
+    padding: 12px 16px;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .add-task-input:focus { border-color: var(--sage); }
+  .add-task-input::placeholder { color: var(--text-muted); }
+
+  .add-btn {
+    background: var(--sage);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius);
+    padding: 12px 20px;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s;
+    white-space: nowrap;
+  }
+  .add-btn:hover { background: var(--sage-dark); }
+
+  .filter-row {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 18px;
+  }
+  .filter-btn {
+    padding: 5px 14px;
+    border-radius: 20px;
+    border: 1.5px solid var(--stone);
+    background: transparent;
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .filter-btn.active, .filter-btn:hover {
+    background: var(--sage);
+    color: #fff;
+    border-color: var(--sage);
+  }
+
+  .task-list { display: flex; flex-direction: column; gap: 8px; }
+
+  .task-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: #fff;
+    border: 1.5px solid var(--stone);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    transition: all 0.18s;
+    animation: fadeIn 0.2s ease;
+  }
+  @keyframes fadeIn { from { opacity:0; transform: translateY(-4px); } to { opacity:1; transform: none; } }
+  .task-item:hover { border-color: var(--mint); box-shadow: 0 2px 10px rgba(119,136,115,0.1); }
+  .task-item.done { opacity: 0.55; }
+
+  .task-check {
+    width: 20px; height: 20px;
+    border-radius: 6px;
+    border: 2px solid var(--stone);
+    background: transparent;
+    cursor: pointer;
+    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.15s;
+    color: transparent;
+    font-size: 11px;
+  }
+  .task-check.checked {
+    background: var(--sage);
+    border-color: var(--sage);
+    color: #fff;
+  }
+
+  .task-text {
+    flex: 1;
+    font-size: 14px;
+    line-height: 1.4;
+    color: var(--text);
+  }
+  .task-item.done .task-text { text-decoration: line-through; color: var(--text-muted); }
+
+  .task-meta {
+    display: flex; align-items: center; gap: 6px;
+  }
+  .task-cat-badge {
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-weight: 500;
+  }
+
+  .task-del {
+    background: none;
+    border: none;
+    color: var(--stone);
+    cursor: pointer;
+    font-size: 16px;
+    line-height: 1;
+    padding: 2px 4px;
+    border-radius: 6px;
+    transition: color 0.15s;
+  }
+  .task-del:hover { color: #c0826a; }
+
+  .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text-muted);
+  }
+  .empty-state-icon { font-size: 40px; margin-bottom: 12px; opacity: 0.4; }
+  .empty-state p { font-size: 14px; }
+
+  /* ── POMODORO PANEL ── */
+  .pom-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(58,56,48,0.35);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+  }
+  .pom-overlay.open { display: flex; }
+
+  .pom-panel {
+    background: var(--cream);
+    border-radius: 24px;
+    padding: 36px 32px;
+    width: 360px;
+    max-width: 95vw;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.18);
+    position: relative;
+    text-align: center;
+  }
+
+  .pom-close {
+    position: absolute; top: 14px; right: 16px;
+    background: none; border: none;
+    font-size: 20px; cursor: pointer;
+    color: var(--text-muted);
+    line-height: 1;
+  }
+
+  .pom-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 6px;
+  }
+  .pom-mode-label {
+    font-size: 12px; font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--sage);
+    margin-bottom: 28px;
+  }
+
+  .pom-ring-wrap {
+    position: relative;
+    width: 200px; height: 200px;
+    margin: 0 auto 28px;
+  }
+  .pom-svg { width: 200px; height: 200px; transform: rotate(-90deg); }
+  .pom-track { fill: none; stroke: var(--stone); stroke-width: 7; }
+  .pom-progress { fill: none; stroke: var(--sage); stroke-width: 7; stroke-linecap: round; transition: stroke-dashoffset 0.5s linear; }
+  .pom-time-display {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+  }
+  .pom-time {
+    font-family: 'Playfair Display', serif;
+    font-size: 42px;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: -0.02em;
+    line-height: 1;
+  }
+  .pom-session-count {
+    font-size: 11px; color: var(--text-muted); margin-top: 6px; font-weight: 500;
+  }
+
+  .pom-modes {
+    display: flex; gap: 8px; margin-bottom: 24px; justify-content: center;
+  }
+  .pom-mode-btn {
+    padding: 7px 16px;
+    border-radius: 20px;
+    border: 1.5px solid var(--stone);
+    background: transparent;
+    font-family: 'Inter', sans-serif;
+    font-size: 12px; font-weight: 500;
+    cursor: pointer; color: var(--text-muted);
+    transition: all 0.15s;
+  }
+  .pom-mode-btn.active { background: var(--sage); color: #fff; border-color: var(--sage); }
+
+  .pom-controls { display: flex; gap: 10px; justify-content: center; margin-bottom: 20px; }
+
+  .pom-btn {
+    padding: 12px 28px;
+    border-radius: 12px;
+    border: none;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px; font-weight: 600;
+    cursor: pointer;
+    transition: all 0.18s;
+  }
+  .pom-btn-primary {
+    background: var(--sage);
+    color: #fff;
+    flex: 1;
+  }
+  .pom-btn-primary:hover { background: var(--sage-dark); }
+  .pom-btn-secondary {
+    background: var(--stone);
+    color: var(--text);
+    padding: 12px 16px;
+  }
+  .pom-btn-secondary:hover { background: #c8bfb0; }
+
+  .pom-task-link {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 8px;
+    padding: 8px 14px;
+    background: rgba(119,136,115,0.08);
+    border-radius: 10px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .pom-task-link strong { color: var(--sage); }
+
+  /* ── MODALS ── */
+  .modal-overlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(58,56,48,0.35);
+    z-index: 200;
+    align-items: center; justify-content: center;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--cream);
+    border-radius: 20px;
+    padding: 28px;
+    width: 340px; max-width: 95vw;
+    box-shadow: 0 16px 50px rgba(0,0,0,0.16);
+  }
+  .modal h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 18px; margin-bottom: 18px; color: var(--text);
+  }
+  .modal input, .modal select {
+    width: 100%;
+    border: 1.5px solid var(--stone);
+    background: #fff;
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px; color: var(--text);
+    outline: none; margin-bottom: 12px;
+  }
+  .modal input:focus, .modal select:focus { border-color: var(--sage); }
+  .color-picker-row {
+    display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px;
+  }
+  .color-swatch {
+    width: 28px; height: 28px;
+    border-radius: 50%; cursor: pointer;
+    border: 3px solid transparent;
+    transition: border-color 0.15s;
+  }
+  .color-swatch.selected { border-color: var(--text); }
+  .modal-btns { display: flex; gap: 8px; justify-content: flex-end; margin-top: 4px; }
+  .modal-btn {
+    padding: 9px 20px; border-radius: 10px; border: none;
+    font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 500; cursor: pointer;
+  }
+  .modal-btn-cancel { background: var(--stone); color: var(--text); }
+  .modal-btn-ok { background: var(--sage); color: #fff; }
+
+  /* ── NOTIFICATION TOAST ── */
+  .toast {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px);
+    background: var(--text); color: #fff;
+    padding: 12px 20px; border-radius: 12px;
+    font-size: 13px; font-weight: 500;
+    z-index: 9999;
+    transition: transform 0.3s cubic-bezier(.34,1.56,.64,1);
+    pointer-events: none;
+    white-space: nowrap;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  /* ── SCROLL ── */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--stone); border-radius: 4px; }
+
+  /* ── MOBILE ── */
+  @media (max-width: 600px) {
+    .sidebar { width: 56px; padding: 20px 0 12px; }
+    .logo { padding: 0 0 18px; text-align: center; font-size: 16px; }
+    .logo span { display: none; }
+    .cat-label { display: none; }
+    .cat-item { padding: 12px; justify-content: center; }
+    .cat-item span.cat-name { display: none; }
+    .cat-count { display: none; }
+    .cat-item.active::before { display: none; }
+    .add-cat-btn span { display: none; }
+    .add-cat-btn { justify-content: center; margin: 8px 6px 0; padding: 8px; }
+    .topbar { padding: 16px 16px 12px; }
+    .content { padding: 16px 16px 80px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+  <div class="logo">Fokus <span>günlük plan</span></div>
+  <div class="cat-label">Kategoriler</div>
+  <div class="cat-list" id="catList"></div>
+  <button class="add-cat-btn" onclick="openCatModal()">
+    <span style="font-size:16px">＋</span>
+    <span>Kategori Ekle</span>
+  </button>
+  <div class="sidebar-footer" style="margin-top:12px">
+    <div class="sidebar-footer-txt">fokus © 2025</div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <div>
+      <div class="topbar-title" id="topbarTitle">Tüm Görevler</div>
+      <div class="topbar-sub" id="topbarSub"></div>
+    </div>
+    <button class="pom-toggle-btn" onclick="openPomodoro()">
+      🍃 Pomodoro
+    </button>
+  </div>
+
+  <div class="content">
+    <!-- Add task -->
+    <div class="add-task-row">
+      <input class="add-task-input" id="taskInput" placeholder="Yeni görev ekle…" onkeydown="if(event.key==='Enter')addTask()">
+      <button class="add-btn" onclick="addTask()">Ekle</button>
+    </div>
+
+    <!-- Filter -->
+    <div class="filter-row">
+      <button class="filter-btn active" onclick="setFilter('all',this)">Tümü</button>
+      <button class="filter-btn" onclick="setFilter('active',this)">Aktif</button>
+      <button class="filter-btn" onclick="setFilter('done',this)">Tamamlanan</button>
+    </div>
+
+    <!-- Tasks -->
+    <div class="task-list" id="taskList"></div>
+    <div class="empty-state" id="emptyState" style="display:none">
+      <div class="empty-state-icon">✦</div>
+      <p>Henüz görev yok.<br>Yukarıdan yeni görev ekleyin.</p>
+    </div>
+  </div>
+</div>
+
+<!-- POMODORO OVERLAY -->
+<div class="pom-overlay" id="pomOverlay">
+  <div class="pom-panel">
+    <button class="pom-close" onclick="closePomodoro()">✕</button>
+    <div class="pom-title">Pomodoro</div>
+    <div class="pom-mode-label" id="pomModeLabel">Odaklanma</div>
+
+    <div class="pom-ring-wrap">
+      <svg class="pom-svg" viewBox="0 0 200 200">
+        <circle class="pom-track" cx="100" cy="100" r="88"/>
+        <circle class="pom-progress" id="pomRing" cx="100" cy="100" r="88"
+          stroke-dasharray="553" stroke-dashoffset="0"/>
+      </svg>
+      <div class="pom-time-display">
+        <div class="pom-time" id="pomTime">25:00</div>
+        <div class="pom-session-count" id="pomSessionLabel">● ● ● ●</div>
+      </div>
+    </div>
+
+    <div class="pom-modes">
+      <button class="pom-mode-btn active" id="modeFocus" onclick="setMode('focus',this)">Odak</button>
+      <button class="pom-mode-btn" id="modeShort" onclick="setMode('short',this)">Kısa Mola</button>
+      <button class="pom-mode-btn" id="modeLong" onclick="setMode('long',this)">Uzun Mola</button>
+    </div>
+
+    <div class="pom-controls">
+      <button class="pom-btn pom-btn-primary" id="pomStartBtn" onclick="toggleTimer()">▶ Başlat</button>
+      <button class="pom-btn pom-btn-secondary" onclick="resetTimer()" title="Sıfırla">↺</button>
+    </div>
+
+    <div class="pom-task-link" id="pomCurrentTask" style="display:none">
+      📌 Şu an: <strong id="pomTaskName"></strong>
+    </div>
+  </div>
+</div>
+
+<!-- ADD CATEGORY MODAL -->
+<div class="modal-overlay" id="catModal">
+  <div class="modal">
+    <h3>Yeni Kategori</h3>
+    <input type="text" id="catNameInput" placeholder="Kategori adı…" maxlength="24">
+    <div class="color-picker-row" id="colorPicker"></div>
+    <div class="modal-btns">
+      <button class="modal-btn modal-btn-cancel" onclick="closeCatModal()">Vazgeç</button>
+      <button class="modal-btn modal-btn-ok" onclick="saveCategory()">Kaydet</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ─── DATA ────────────────────────────────────
+const CAT_COLORS = ['#778873','#A1BC98','#c0826a','#7fa5c2','#c2a857','#9a7fc2','#6ab8a0','#c27fa5'];
+const DEFAULT_CATS = [
+  { id:'all', name:'Tüm Görevler', color:'#778873', builtin: true },
+  { id:'personal', name:'Kişisel', color:'#A1BC98', builtin: false },
+  { id:'work', name:'İş', color:'#c0826a', builtin: false },
+  { id:'health', name:'Sağlık', color:'#6ab8a0', builtin: false },
+];
+
+let state = {
+  categories: [],
+  tasks: [],
+  selectedCat: 'all',
+  filter: 'all',
+  pomodoro: {
+    mode: 'focus',
+    running: false,
+    secondsLeft: 25*60,
+    sessions: 0,
+    timerId: null,
+    focusMins: 25,
+    shortMins: 5,
+    longMins: 15,
+  }
+};
+
+const MODES = { focus: 25, short: 5, long: 15 };
+const MODE_LABELS = { focus: 'Odaklanma', short: 'Kısa Mola', long: 'Uzun Mola' };
+let pomTotal = 25*60;
+
+function load() {
+  try {
+    const s = localStorage.getItem('fokus_state');
+    if (s) {
+      const parsed = JSON.parse(s);
+      state.categories = parsed.categories || [];
+      state.tasks = parsed.tasks || [];
+      state.selectedCat = parsed.selectedCat || 'all';
+      state.pomodoro.sessions = parsed.sessions || 0;
+    }
+    if (!state.categories.length) state.categories = DEFAULT_CATS.map(c=>({...c}));
+  } catch(e) { state.categories = DEFAULT_CATS.map(c=>({...c})); }
+}
+
+function save() {
+  localStorage.setItem('fokus_state', JSON.stringify({
+    categories: state.categories,
+    tasks: state.tasks,
+    selectedCat: state.selectedCat,
+    sessions: state.pomodoro.sessions,
+  }));
+}
+
+// ─── CATEGORIES ──────────────────────────────
+function renderCats() {
+  const list = document.getElementById('catList');
+  list.innerHTML = '';
+  state.categories.forEach(cat => {
+    const count = cat.id === 'all'
+      ? state.tasks.filter(t=>!t.done).length
+      : state.tasks.filter(t=>t.catId===cat.id && !t.done).length;
+
+    const el = document.createElement('div');
+    el.className = 'cat-item' + (state.selectedCat===cat.id?' active':'');
+    el.innerHTML = `
+      <span class="cat-dot" style="background:${cat.color}"></span>
+      <span class="cat-name">${cat.name}</span>
+      ${count > 0 ? `<span class="cat-count">${count}</span>` : ''}
+      ${!cat.builtin ? `<span class="cat-del-btn" title="Sil" onclick="deleteCategory('${cat.id}',event)" style="margin-left:auto;cursor:pointer;opacity:0.4;font-size:12px;color:#fff">✕</span>` : ''}
+    `;
+    el.onclick = (e) => { if(e.target.classList.contains('cat-del-btn')) return; selectCat(cat.id); };
+    list.appendChild(el);
+  });
+}
+
+function selectCat(id) {
+  state.selectedCat = id;
+  save();
+  const cat = state.categories.find(c=>c.id===id);
+  document.getElementById('topbarTitle').textContent = cat ? cat.name : 'Tümü';
+  renderCats();
+  renderTasks();
+}
+
+function deleteCategory(id, e) {
+  e.stopPropagation();
+  state.tasks = state.tasks.filter(t=>t.catId!==id);
+  state.categories = state.categories.filter(c=>c.id!==id);
+  if(state.selectedCat===id) state.selectedCat='all';
+  save(); renderCats(); renderTasks();
+  showToast('Kategori silindi');
+}
+
+// ─── TASKS ───────────────────────────────────
+function addTask() {
+  const inp = document.getElementById('taskInput');
+  const text = inp.value.trim();
+  if(!text) return;
+  const catId = state.selectedCat === 'all' ? (state.categories.find(c=>!c.builtin)?.id || 'personal') : state.selectedCat;
+  state.tasks.unshift({ id: Date.now().toString(), text, catId, done: false, createdAt: Date.now() });
+  inp.value = '';
+  save(); renderCats(); renderTasks();
+}
+
+function toggleTask(id) {
+  const t = state.tasks.find(t=>t.id===id);
+  if(t) { t.done=!t.done; save(); renderCats(); renderTasks(); }
+}
+
+function deleteTask(id) {
+  state.tasks = state.tasks.filter(t=>t.id!==id);
+  save(); renderCats(); renderTasks();
+}
+
+function setFilter(f, btn) {
+  state.filter = f;
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderTasks();
+}
+
+function renderTasks() {
+  const list = document.getElementById('taskList');
+  const empty = document.getElementById('emptyState');
+  const sub = document.getElementById('topbarSub');
+
+  let tasks = state.selectedCat === 'all'
+    ? [...state.tasks]
+    : state.tasks.filter(t=>t.catId===state.selectedCat);
+
+  if(state.filter==='active') tasks=tasks.filter(t=>!t.done);
+  if(state.filter==='done') tasks=tasks.filter(t=>t.done);
+
+  const total = tasks.length;
+  const done = tasks.filter(t=>t.done).length;
+  sub.textContent = total ? `${done}/${total} tamamlandı` : '';
+
+  if(!tasks.length) {
+    list.innerHTML=''; empty.style.display='block'; return;
+  }
+  empty.style.display='none';
+
+  list.innerHTML = tasks.map(t => {
+    const cat = state.categories.find(c=>c.id===t.catId);
+    const badgeBg = cat ? cat.color+'22' : '#eee';
+    const badgeColor = cat ? cat.color : '#888';
+    const badgeName = cat ? cat.name : '';
+    return `
+      <div class="task-item${t.done?' done':''}">
+        <div class="task-check${t.done?' checked':''}" onclick="toggleTask('${t.id}')">
+          ${t.done?'✓':''}
+        </div>
+        <div class="task-text">${escHtml(t.text)}</div>
+        <div class="task-meta">
+          ${state.selectedCat==='all' && cat ? `<span class="task-cat-badge" style="background:${badgeBg};color:${badgeColor}">${badgeName}</span>` : ''}
+          <button class="task-del" onclick="deleteTask('${t.id}')">✕</button>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function escHtml(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+// ─── CATEGORY MODAL ──────────────────────────
+let selectedColor = CAT_COLORS[0];
+function openCatModal() {
+  selectedColor = CAT_COLORS[Math.floor(Math.random()*CAT_COLORS.length)];
+  document.getElementById('catNameInput').value='';
+  renderColorPicker();
+  document.getElementById('catModal').classList.add('open');
+  setTimeout(()=>document.getElementById('catNameInput').focus(),100);
+}
+function closeCatModal(){ document.getElementById('catModal').classList.remove('open'); }
+function renderColorPicker(){
+  const cp=document.getElementById('colorPicker');
+  cp.innerHTML=CAT_COLORS.map(c=>`<div class="color-swatch${c===selectedColor?' selected':''}" style="background:${c}" onclick="selectColor('${c}')"></div>`).join('');
+}
+function selectColor(c){ selectedColor=c; renderColorPicker(); }
+function saveCategory(){
+  const name=document.getElementById('catNameInput').value.trim();
+  if(!name){ showToast('Kategori adı boş olamaz'); return; }
+  const id='cat_'+Date.now();
+  state.categories.push({id, name, color:selectedColor, builtin:false});
+  save(); renderCats(); closeCatModal();
+  showToast(`"${name}" eklendi`);
+}
+
+// ─── POMODORO ────────────────────────────────
+const CIRC = 2*Math.PI*88; // 553
+
+function openPomodoro(){
+  document.getElementById('pomOverlay').classList.add('open');
+  updatePomUI();
+}
+function closePomodoro(){
+  document.getElementById('pomOverlay').classList.remove('open');
+}
+
+function setMode(mode, btn){
+  if(state.pomodoro.running) return;
+  state.pomodoro.mode=mode;
+  pomTotal = MODES[mode]*60;
+  state.pomodoro.secondsLeft = pomTotal;
+  document.querySelectorAll('.pom-mode-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  updatePomUI();
+}
+
+function toggleTimer(){
+  if(state.pomodoro.running){ pauseTimer(); } else { startTimer(); }
+}
+
+function startTimer(){
+  state.pomodoro.running=true;
+  document.getElementById('pomStartBtn').textContent='⏸ Duraklat';
+  state.pomodoro.timerId = setInterval(()=>{
+    state.pomodoro.secondsLeft--;
+    if(state.pomodoro.secondsLeft<=0){
+      clearInterval(state.pomodoro.timerId);
+      state.pomodoro.running=false;
+      state.pomodoro.secondsLeft=0;
+      updatePomUI();
+      onTimerEnd();
+    } else { updatePomUI(); }
+  },1000);
+}
+
+function pauseTimer(){
+  clearInterval(state.pomodoro.timerId);
+  state.pomodoro.running=false;
+  document.getElementById('pomStartBtn').textContent='▶ Devam Et';
+}
+
+function resetTimer(){
+  clearInterval(state.pomodoro.timerId);
+  state.pomodoro.running=false;
+  pomTotal=MODES[state.pomodoro.mode]*60;
+  state.pomodoro.secondsLeft=pomTotal;
+  document.getElementById('pomStartBtn').textContent='▶ Başlat';
+  updatePomUI();
+}
+
+function onTimerEnd(){
+  if(state.pomodoro.mode==='focus'){
+    state.pomodoro.sessions++;
+    save();
+    showToast('🎉 Odak tamamlandı! Mola verin.');
+    if(Notification.permission==='granted'){
+      new Notification('Fokus', {body:'Odak süresi bitti! Mola zamanı 🍃', icon:''});
+    }
+  } else {
+    showToast('Mola bitti! Odaklanma zamanı.');
+  }
+  document.getElementById('pomStartBtn').textContent='▶ Başlat';
+  updatePomUI();
+}
+
+function updatePomUI(){
+  const s=state.pomodoro.secondsLeft;
+  const m=Math.floor(s/60), sec=s%60;
+  document.getElementById('pomTime').textContent=`${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;
+  document.getElementById('pomModeLabel').textContent=MODE_LABELS[state.pomodoro.mode];
+  const total = pomTotal > 0 ? pomTotal : MODES[state.pomodoro.mode]*60;
+  const ratio = s / total;
+  const offset = CIRC*(1-ratio);
+  document.getElementById('pomRing').style.strokeDasharray=CIRC;
+  document.getElementById('pomRing').style.strokeDashoffset=offset;
+
+  // ring color
+  const ring=document.getElementById('pomRing');
+  ring.style.stroke = state.pomodoro.mode==='focus' ? 'var(--sage)' : 'var(--mint)';
+
+  // sessions
+  const sessions=state.pomodoro.sessions%4;
+  document.getElementById('pomSessionLabel').textContent=
+    '●'.repeat(sessions)+'○'.repeat(4-sessions)+` (${state.pomodoro.sessions} oturum)`;
+
+  // update page title
+  if(state.pomodoro.running){
+    document.title=`${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')} — Fokus`;
+  } else {
+    document.title='Fokus';
+  }
+}
+
+// ─── TOAST ───────────────────────────────────
+let toastTimer;
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>t.classList.remove('show'),2400);
+}
+
+// ─── NOTIFICATIONS ───────────────────────────
+function requestNotifPerm(){
+  if('Notification' in window && Notification.permission==='default'){
+    Notification.requestPermission();
+  }
+}
+
+// ─── INIT ────────────────────────────────────
+load();
+pomTotal = MODES[state.pomodoro.mode]*60;
+state.pomodoro.secondsLeft = pomTotal;
+renderCats();
+selectCat(state.selectedCat);
+updatePomUI();
+requestNotifPerm();
+
+// Keyboard shortcut: N to focus input, P to open pomodoro
+document.addEventListener('keydown', e=>{
+  if(e.key==='n' && !['INPUT','TEXTAREA'].includes(e.target.tagName)){
+    document.getElementById('taskInput').focus(); e.preventDefault();
+  }
+  if(e.key==='p' && !['INPUT','TEXTAREA'].includes(e.target.tagName)){
+    openPomodoro(); e.preventDefault();
+  }
+});
+
+// Close modals on overlay click
+document.getElementById('pomOverlay').addEventListener('click', e=>{
+  if(e.target===e.currentTarget) closePomodoro();
+});
+document.getElementById('catModal').addEventListener('click', e=>{
+  if(e.target===e.currentTarget) closeCatModal();
+});
+document.getElementById('catNameInput').addEventListener('keydown', e=>{
+  if(e.key==='Enter') saveCategory();
+});
+</script>
+</body>
+</html>
